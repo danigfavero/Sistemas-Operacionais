@@ -18,14 +18,15 @@ typedef int bool;
 
 bool valid_file(char *path) {
     // File exists and is executable by the calling process's
-    if (access(path, X_OK) != 1)
+    execve("oi", NULL, NULL);
+    if (access(path, X_OK) != -1)
         return true;
     printf("Error: file not found!\n");
     return false;
 }
 
 char *path_root(char *path) {
-
+    return path;
 }
 
 void process(char *cmd, char *path) {
@@ -35,27 +36,45 @@ void process(char *cmd, char *path) {
 
     path = path_root(path);
 
+    path = strcat(path, "\0");
+
+    int i = 0;
+    while (path[i] != '\n') i++;
+    path[i] = '\0';
+
     if (!valid_file(path))
         return;
 
     if (strcmp(cmd, "protegepracaramba") == 0) {
         int res;
         res = chmod(path, 000);
-        if (res == -1) 
+        if (res == -1)
             fprintf(stderr, "chmod failed, errno = %d\n", res);
     }
 
     else if (strcmp(cmd, "liberageral") == 0) {
         int res;
         res = chmod(path, 777);
-        if (res == -1) 
+        if (res == -1)
             fprintf(stderr, "chmod failed, errno = %d\n", res);
     }
 
-    else if (strcmp(cmd, "rodeveja") == 0) {
+    else if (strcmp(cmd, "rodeveja") == 0){
 
+        pid_t pid = fork();
+        if (pid == 0)
+            if (execve(path, (char **)NULL, NULL) == -1)
+                printf("Error executing file!\n");
+        else {
+            int status;
+            int pid = wait(&status);
+            if (pid == -1)
+                printf("Error while waiting for the child process to end!\n");
+            else
+                printf("programa ‘%s’ retornou com código %d", path, WEXITSTATUS(status));
+        }
     }
- 
+
     else if (strcmp(cmd, "rode") == 0) {
 
     }
