@@ -44,7 +44,6 @@ int word_count(char *str) {
 // faz com que o arquivo dado como parâmetro tenha proteção 000
 void protegepracaramba(char *cmd, char *path) {
 
-    if (!valid_file(path, F_OK)) return;
     int res;
     res = chmod(path, 0000);
     if (res == -1)
@@ -54,7 +53,6 @@ void protegepracaramba(char *cmd, char *path) {
 //  faz com que o arquivo dado como parâmetro tenha proteção 777
 void liberageral(char *cmd, char *path) {
 
-    if (!valid_file(path, F_OK)) return;
     int res;
     res = chmod(path, 0777);
     if (res == -1)
