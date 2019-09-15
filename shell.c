@@ -10,13 +10,8 @@ typedef int bool;
 #define true 1
 #define false 0
 
-// critical error dealing
-#define ERROR(...) { \
-        fprintf(stderr, __VA_ARGS__); \
-        exit(EXIT_FAILURE); \
-}
 
-// checks if file exists or if it exists and is executable
+/* checks if file exists or if it exists and is executable  */
 bool valid_file(char *path, int mode) {
 
     if (access(path, mode) != -1)
@@ -25,13 +20,13 @@ bool valid_file(char *path, int mode) {
     return false;
 }
 
-// removes line feed character from the end of char*
+/* removes line feed character from the end of char*  */
 void remove_lf(char *path) {
 
     path[strlen(path)-1] = '\0';
 }
 
-// counts words of a given string
+/* counts words of a given string  */
 int word_count(char *str) {
     int count = 1, i;
     for (i = 0; str[i] != '\0'; i++) {
@@ -41,7 +36,7 @@ int word_count(char *str) {
     return count;
 }
 
-// faz com que o arquivo dado como parâmetro tenha proteção 000
+/* faz com que o arquivo dado como parâmetro tenha proteção 000  */
 void protegepracaramba(char *cmd, char *path) {
 
     int res;
@@ -50,7 +45,7 @@ void protegepracaramba(char *cmd, char *path) {
         fprintf(stderr, "chmod failed, errno = %d\n", res);
 }
 
-//  faz com que o arquivo dado como parâmetro tenha proteção 777
+/*  faz com que o arquivo dado como parâmetro tenha proteção 777  */
 void liberageral(char *cmd, char *path) {
 
     int res;
@@ -59,12 +54,13 @@ void liberageral(char *cmd, char *path) {
         fprintf(stderr, "chmod failed, errno = %d\n", res);
 }
 
-// executa o programa indicado e emite uma mensagem indicando o código
-// de retorno
+/* executa o programa indicado e emite uma mensagem indicando o código
+   de retorno  */
 void rodeveja(char *cmd, char *path) {
 
+    pid_t pid;
     if (!valid_file(path, X_OK)) return;
-    pid_t pid = fork();
+    pid = fork();
 
     if (pid == 0) {
         char* argv[] = {NULL}; 
@@ -83,11 +79,12 @@ void rodeveja(char *cmd, char *path) {
     }
 }
 
-// executa o programa indicado em background 
+/* executa o programa indicado em background */ 
 void rode(char *cmd, char *path) {
 
+    pid_t pid;
     if (!valid_file(path, X_OK)) return;
-    pid_t pid = fork();
+    pid = fork();
 
     if (pid == 0) {
         char* argv[] = {NULL}; 
@@ -98,8 +95,8 @@ void rode(char *cmd, char *path) {
     }
 }
 
-// given a command (cmd) and a file-path (path) executes the respective
-// function on the specified file
+/* given a command (cmd) and a file-path (path) executes the respective
+   function on the specified file  */
 void process(char *cmd, char *path) {
 
     if (cmd == NULL || path == NULL) {
@@ -122,20 +119,24 @@ void process(char *cmd, char *path) {
         rode(cmd, path);
 
     else {
-        ERROR("Error while processing: invalid syntax!\n");
+        fprintf(stderr, "Error while processing: invalid syntax!\n");
+        exit(EXIT_FAILURE);
         return;
     }    
 }
 
-// split the received char array into two words, the command and the
-// path
+/* split the received char array into two words, the command and the
+   path  */
 char **parse_arg(char *arg) {
 
+    int i;
     char *token;
     char **parse = malloc(2*sizeof(char*));
 
-    if (parse == NULL)
-        ERROR("Error in parse_arg(): could not allocate memory!\n");
+    if (parse == NULL) {
+        fprintf(stderr, "Error in parse_arg(): could not allocate memory!\n");
+        exit(EXIT_FAILURE);
+    }    
 
     if (word_count(arg) != 2) {
         parse[0] = NULL;
@@ -145,10 +146,12 @@ char **parse_arg(char *arg) {
     }    
 
     token = strtok(arg, " ");
-    for (int i = 0; i < 2; i++) {
+    for (i = 0; i < 2; i++) {
         parse[i] = malloc((strlen(token)+1)*sizeof(char));
-        if (parse[i] == NULL)
-            ERROR("Error in parse_arg(): could not allocate memory!\n");
+        if (parse[i] == NULL) {
+            fprintf(stderr, "Error in parse_arg(): could not allocate memory!\n");
+            exit(EXIT_FAILURE);
+        }
         strcpy(parse[i], token);
         parse[i][strlen(token)] = '\0';
         token = strtok(NULL, " ");
@@ -161,8 +164,10 @@ char **parse_arg(char *arg) {
 int main(int argc, char **argv) {
 
     char *buffer = malloc(sizeof(char) * 256);
-    if (buffer == NULL)
-        ERROR("Error in main(): could not allocate buffer\n");
+    if (buffer == NULL) {
+        fprintf(stderr, "Error in main(): could not allocate buffer\n");
+        exit(EXIT_FAILURE);
+    }
 
     printf("> ");
     while (fgets(buffer, 256, stdin) != NULL){
@@ -177,7 +182,7 @@ int main(int argc, char **argv) {
         free(parse);
     }
 
-    // waiting children processes to end
+    /* waiting children processes to end  */
     while (wait(NULL))
 
     free(buffer);
