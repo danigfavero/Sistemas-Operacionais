@@ -39,8 +39,9 @@ void remove_lf(char *path) {
 /* counts words of a given string */
 int word_count(char *str) {
 
+    int i;
     int state = 0, count = 0;
-    for (int i = 0; str[i] != '\0'; i++) {
+    for (i = 0; str[i] != '\0'; i++) {
         if (str[i] == ' ' || str[i] == '\n' || str[i] == '\t')
             state = 0;
         else if (state == 0) {
@@ -72,12 +73,12 @@ void liberageral(char *cmd, char *path) {
 /* executes the given program and print the returned value in the stdout */
 void rodeveja(char *cmd, char *path) {
 
+    pid_t pid;
     if (!valid_file(path, X_OK)) {
         printf("Error while executing file: permission denied!\n");
         return;
     }
 
-    pid_t pid;
     pid = fork();
 
     if (pid == 0) {
@@ -101,12 +102,12 @@ void rodeveja(char *cmd, char *path) {
    of the stdin */
 void rode(char *cmd, char *path) {
 
+    pid_t pid;
     if (!valid_file(path, X_OK)) {
         printf("Error while executing file: permission denied!\n");
         return;
     }
 
-    pid_t pid;
     pid = fork();
 
     if (pid == 0) {
