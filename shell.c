@@ -5,13 +5,23 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-
 typedef int bool;
 #define true 1
 #define false 0
 
+/*
+    Simple shell made for MINIX system calls. There are for options to use it:
 
-/* checks if file exists or if it exists and is executable  */
+    1. 'liberageral <file-path>' : gives 777 permission to the file;
+    2. 'protegepracaramba <file-path>' : gives 000 permission to the file;
+    3. 'rodeveja <file-path>' : executes the file and print returned status;
+    4. 'rode <file-path>' : executes the file in background.
+
+    Made by Daniela Favero and Felipe Noronha at IME-USP.
+*/
+
+/* checks if file exists or if it exists and is executable/locked, according
+   to the given mode */
 bool valid_file(char *path, int mode) {
 
     if (access(path, mode) != -1)
@@ -20,23 +30,28 @@ bool valid_file(char *path, int mode) {
     return false;
 }
 
-/* removes line feed character from the end of char*  */
+/* removes line feed character from the end of char* */
 void remove_lf(char *path) {
 
     path[strlen(path)-1] = '\0';
 }
 
-/* counts words of a given string  */
+/* counts words of a given string */
 int word_count(char *str) {
-    int count = 1, i;
-    for (i = 0; str[i] != '\0'; i++) {
-        if (str[i] == ' ' && str[i+1] != ' ')
-            count++;    
-    }  
+
+    int state = 0, count = 0;
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] == ' ' || str[i] == '\n' || str[i] == '\t')
+            state = 0;
+        else if (state == 0) {
+            state = 1;
+            count++;
+        }
+    }
     return count;
 }
 
-/* faz com que o arquivo dado como parâmetro tenha proteção 000  */
+/* make given file receive 000 protection */
 void protegepracaramba(char *cmd, char *path) {
 
     int res;
@@ -45,7 +60,7 @@ void protegepracaramba(char *cmd, char *path) {
         fprintf(stderr, "chmod failed, errno = %d\n", res);
 }
 
-/*  faz com que o arquivo dado como parâmetro tenha proteção 777  */
+/* make given file receive 000 protection */
 void liberageral(char *cmd, char *path) {
 
     int res;
@@ -54,19 +69,22 @@ void liberageral(char *cmd, char *path) {
         fprintf(stderr, "chmod failed, errno = %d\n", res);
 }
 
-/* executa o programa indicado e emite uma mensagem indicando o código
-   de retorno  */
+/* executes the given program and print the returned value in the stdout */
 void rodeveja(char *cmd, char *path) {
 
+    if (!valid_file(path, X_OK)) {
+        printf("Error while executing file: permission denied!\n");
+        return;
+    }
+
     pid_t pid;
-    if (!valid_file(path, X_OK)) return;
     pid = fork();
 
     if (pid == 0) {
-        char* argv[] = {NULL}; 
+        char* argv[] = {NULL};
         char* envp[] = {NULL};
         if (execve(path, argv, envp) == -1)
-            printf("Error executing file!\n");    
+            printf("Error executing file!\n");
     }
 
     else {
@@ -79,19 +97,24 @@ void rodeveja(char *cmd, char *path) {
     }
 }
 
-/* executa o programa indicado em background */ 
+/* executes the given program in background, while out shell keep in commmand
+   of the stdin */
 void rode(char *cmd, char *path) {
 
+    if (!valid_file(path, X_OK)) {
+        printf("Error while executing file: permission denied!\n");
+        return;
+    }
+
     pid_t pid;
-    if (!valid_file(path, X_OK)) return;
     pid = fork();
 
     if (pid == 0) {
-        char* argv[] = {NULL}; 
+        char* argv[] = {NULL};
         char* envp[] = {NULL};
         fclose(stdin);
         if (execve(path, argv, envp) == -1)
-            printf("Error executing file!\n");   
+            printf("Error executing file!\n");
     }
 }
 
@@ -102,9 +125,14 @@ void process(char *cmd, char *path) {
     if (cmd == NULL || path == NULL) {
         printf("Error while processing: invalid syntax!\n");
         return;
-    }    
+    }
 
     remove_lf(path);
+
+    if (!valid_file(path, F_OK)) {
+        printf("Error while processing: file does not exist!\n");
+        return;
+    }
 
     if (strcmp(cmd, "protegepracaramba") == 0)
         protegepracaramba(cmd, path);
@@ -120,9 +148,8 @@ void process(char *cmd, char *path) {
 
     else {
         fprintf(stderr, "Error while processing: invalid syntax!\n");
-        exit(EXIT_FAILURE);
         return;
-    }    
+    }
 }
 
 /* split the received char array into two words, the command and the
@@ -136,14 +163,14 @@ char **parse_arg(char *arg) {
     if (parse == NULL) {
         fprintf(stderr, "Error in parse_arg(): could not allocate memory!\n");
         exit(EXIT_FAILURE);
-    }    
+    }
 
     if (word_count(arg) != 2) {
         parse[0] = NULL;
         parse[1] = NULL;
         free(token);
         return parse;
-    }    
+    }
 
     token = strtok(arg, " ");
     for (i = 0; i < 2; i++) {
