@@ -12,7 +12,7 @@ Como o mecanismo que faz alocação de memória e a implementação do memory ma
 
 Assim como no EP2, definimos duas novas entrada no arquivo `/usr/src/servers/pm/table.c`, a entrada para `memorymap` fica na posição 64 e para `memalloc` na 66. Adicionamos também os protótipos das nova chamadas em `/usr/src/servers/pm/proto.h`. Em seguida, no arquivo `/usr/src/servers/pm/alloc.c` foram implementadas as funções:
 - `do_memalloc` , tal função faz a checagem se o processo que invocou a  é _root_, (sua principal ação será explicada na próxima sessão);
-- `memory_map`, que imprime o mapa da memória.
+- `memorymap`, que imprime o mapa da memória.
 
 Para definir funções que possam ser utilizadas como uma biblioteca disponível para o usuário, modificamos os arquivos `/usr/src/include/minix/callnr.h` e `/usr/include/minix/callnr.h`, definindo MEMORYMAP para o valor 64 e MEMALLOC para 66. Na pasta `/usr/src/lib/posix/` adicionamos tanto o arquivo `_memalloc.c`, quanto o `_memorymap.c`, que serão responsáveis por fornecer a interface entre a função de usuário e a syscall.
 
@@ -31,7 +31,7 @@ Finalmente, a função que realiza a alocação de memória em si, `alloc_mem`, 
 # 3 Utilitário
 
 O utilitário _memorymap_ saída padrão (o terminal do QEMU) um “mapa” da memória. Este mapa consiste em uma tabela com cabeçalho “pid start end”, além de imprimir no final a quantidade total de memória livre. 
-A implementação do utilitário se encontra em `/usr/src/servers/pm/alloc.c` e é bem simples. Primeiro checamos se a chamada de sistema para conseguir os processos foi bem sucedida. Depois, percorremos a lista de *structs pid_t* obtendo seus respectivos _pid_, _start_ e _end_. Imprimimos conforme a formatação pedida. Por fim, percorremos a lista de _memory holes_, incrementando dois contadores que guardam a memória livre (em _clicks_ e _bytes_) até então. Por fim imprimimos a *Available memory*.
+A implementação do utilitário se encontra em `/usr/src/servers/pm/alloc.c` na função `memorymap()` e é bem simples. Primeiro checamos se a chamada de sistema para conseguir os processos foi bem sucedida. Depois, percorremos a lista de *structs pid_t* obtendo seus respectivos _pid_, _start_ e _end_. Imprimimos conforme a formatação pedida. Por fim, percorremos a lista de _memory holes_, incrementando dois contadores que guardam a memória livre (em _clicks_ e _bytes_) até então. Por fim imprimimos a *Available memory*.
 
 # 4 Teste
 
