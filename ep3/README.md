@@ -41,5 +41,5 @@ Demos `$ make` em `/usr/src/commands/simple` e `$ make install` em `/usr/src/com
 
 # 4 Teste
 
-Há um arquivo `teste.c` em `/home`. Compile-o e execute para ver a saída (que aparecerá apenas no terminal do QEMU) do memory map conforme modificamos a políticas de alocação de memória. 
+Há um arquivo `teste.c` em `/home`. Compile-o e execute para ver a saída do memory map conforme modificamos a políticas de alocação de memória, além de uma checagem se o memalloc funciona.
 Também é possível testar o memory map chamando `$ memmap` no terminal.
