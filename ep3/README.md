@@ -39,3 +39,4 @@ Após a implementação do código, foi necessário alterar o Makefile do `/usr/
 # 4 Teste
 
 Há um arquivo `teste.c` em `/home`. Compile-o e execute para ver a saída (que aparecerá apenas no terminal do QEMU) do memory map conforme modificamos a políticas de alocação de memória. 
+Também é possível testar o memory map chamando `$ memmap` no terminal.
