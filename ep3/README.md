@@ -4,8 +4,8 @@
 
 ---
 
-Nesse EP modificamos os **memory manager** do MINIX 3. Adicionamos a chamada de sistema `memalloc()` que muda a politica de alocação de memoria entre _first-fit_ e _worst-fit_. Além disso, implementamos o utilitario `memorymap` que exibe o _memory map_.
-Note que é possível encontrar os códigos que alteramos com /*EP3###(...)####*/ em arquivos C.
+Nesse EP modificamos os **memory manager** do MINIX 3. Adicionamos a chamada de sistema `memalloc()` que muda a politica de alocação de memoria entre _first-fit_ e _worst-fit_. Além disso, implementamos o utilitário `memmap` que exibe o _memory map_.
+Note que é possível encontrar os códigos que alteramos com /\*EP3###(...)####\*/ em arquivos C.
 
 # 1 Definindo a _syscall_
 
@@ -32,9 +32,12 @@ Finalmente, a função que realiza a alocação de memória em si, `alloc_mem`, 
 Para a implementação do utilitário, nos inspiramos muito em outro utilitário, o `top.c`. Assim como no programa `top`, criamos um arquivo com o código fonte do mesmo em `/usr/src/commands/simple` chamado `memmap.c`. 
 O código do utilitário consiste em:
 - Utilizar o `getsysinfo` para conseguir as informações dos processos que estão ocupando a memória e os buracos da mesma. Ainda utilizamos uma verificação de erro ao obter as sysinfos do `SI_MEM_ALLOC` (para acessar a struct `pm_mem_info`, que possui informações sobre os buracos da memória) e do `SI_PROC_TAB` (para acessar a struct `mproc` que contém as informações dos processos, como *pid*, *start* e *end*);
-- Imprimir os pids, início e final (na memória) dos processos que estão ocupando memória na máquina. Percorrendo por todos os *NR_PROCS* processos, obtemos do i-ésimo mproc[i] seu pid (acesso direto na struct), seu início e final (delimitados pelo vetor mp_seg[], o segmento de memória, que possui 3 posições; portanto obtemos mp_seg[0] e mp_seg[2]);
-- Imprimir o espaço disponível na memória, fazemos isso como o `top.c` faz, percorrendo os buracos nos utilizando da struct `pm_mem_info`, obtendo a base do vetor de buracos e o comprimento do mesmo. Somamos e comprimento de todos os buracos e obtemos a memória disponível em KB.
-Após a implementação do código, foi necessário alterar o Makefile do `/usr/src/commands/simple`, fizemos analogamente aos outros arquivos do simple: o Makefile trata da compilação e instalação do nosso utilitário (busque por `memmap` no Makefile para ver as alterações).
+- Imprimir os pids, início e final (na memória) dos processos que estão ocupando memória na máquina. Percorrendo por todos os *NR_PROCS* processos, obtemos do i-ésimo `mproc[i]` seu pid (acesso direto na struct), seu início e final (delimitados pelo vetor mp_seg[], o segmento de memória, que possui 3 posições; portanto obtemos `mp_seg[0]` e `mp_seg[2]`);
+- Imprimir o espaço disponível na memória, fazemos isso como o `top.c` faz, percorrendo os buracos nos utilizando da struct `pm_mem_info`, obtendo a base do vetor de buracos e o comprimento do mesmo. Somamos e comprimento de todos os buracos e obtemos a memória disponível em KB.  
+
+Após a implementação do código, foi necessário alterar o Makefile do `/usr/src/commands/simple`, fizemos analogamente aos outros arquivos do simple: o Makefile trata da compilação e instalação do nosso utilitário (busque por `memmap` no Makefile para ver as alterações).   
+
+Demos `$ make` em `/usr/src/commands/simple` e `$ make install` em `/usr/src/commands`, é possível verificar que o binário foi criado em `usr/bin`. 
 
 # 4 Teste
 
